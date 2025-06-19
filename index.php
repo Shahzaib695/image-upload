@@ -13,41 +13,35 @@
 </form>
 <?php
     include("db.php");
-    if (isset($_POST['uploadbtn'])) {
-        if (isset($_FILES['imageupload']) && is_array($_FILES['imageupload']['name'])) {
-            for ($i = 0; $i < count($_FILES['imageupload']['name']); $i++){
-                $image_name = $_FILES['imageupload']['name'][$i];
-                $image_type = $_FILES['imageupload']['type'][$i];
-                $image_tmp = $_FILES['imageupload']['tmp_name'][$i];
-                $image_size = $_FILES['imageupload']['size'][$i];
-                $folder = "images/";
-    
-                if (strtolower($image_type) == "image/jpg" || strtolower($image_type) == "image/jpeg" || strtolower($image_type) == "image/png") {
-                    if ($image_size <= 1000000) {
-                        $image_path = $folder . basename($image_name);
-    
-                        $query = "INSERT INTO `image`(`image_path`) VALUES ('$image_path')";
-                        $result = mysqli_query($conn, $query);
-    
-                        if ($result) {
-                            move_uploaded_file($image_tmp, $image_path);
-                            echo "<script>alert('Image uploaded successfully');</script>";
-                        } else {
-                            echo "Failed to insert into database.";
-                        }
-                    } else {
-                        echo "Image size is too large.";
+    if(isset($_POST['uploadbtn'])){
+        for($i = 0; $i < count($_FILES['imageupload']['name']); $i++){
+            $image_name = $_FILES['imageupload']['name'][$i];
+            $image_type = $_FILES['imageupload']['type'][$i];
+            $image_tmp = $_FILES['imageupload']['tmp_name'][$i];
+            $image_size = $_FILES['imageupload']['size'][$i];
+            $folder = "images/";
+            if(strtolower($image_type) == "image/jpg" || strtolower($image_type) == "image/jpeg" || strtolower($image_type) == "image/png"){
+                if($image_size <= 1000000){
+                    $folder = "images/" . $image_name;
+                    $query = "INSERT INTO `image`(`image_path`) VALUES ('$folder')";
+                    $result = mysqli_query($conn, $query);
+                    if(!$result){
+                        echo "<script>alert('Images not uploaded')</script>";
+                        exit;
+                    }else{
+                        move_uploaded_file($image_tmp, $folder);
                     }
-                } else {
-                    echo "Image type is not valid.";
+                }else{
+                    echo "<script>alert('Images not uploaded')</script>";
+                    exit;
                 }
+            }else{
+                echo "<script>alert('Images not uploaded')</script>";
+                exit;
             }
-        } else {
-            echo "No files were uploaded.";
         }
+        echo "<script>alert('Images uploaded successfully')</script>";
     }
-    
-
     $select = "SELECT * FROM `image`";
     $result = mysqli_query($conn, $select);
     $total_row = mysqli_num_rows($result);
